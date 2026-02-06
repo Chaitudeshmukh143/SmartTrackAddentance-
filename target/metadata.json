@@ -1,0 +1,7 @@
+{
+  "name": "EduAttend Pro",
+  "description": "A comprehensive attendance and classroom management system for teachers and students, featuring QR-based joining, AI-assisted note summaries, real-time chat, and detailed attendance analytics.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
