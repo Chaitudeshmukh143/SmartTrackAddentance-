@@ -73,7 +73,7 @@ const StudentClassroomView: React.FC<StudentClassroomViewProps> = ({ classroom, 
   };
 
   return (
-    <div className="max-w-6xl mx-auto animate-in fade-in slide-in-from-right-4 duration-500">
+    <div className="max-w-5xl mx-auto scale-[0.95] origin-top animate-in fade-in slide-in-from-right-4 duration-500">
       <div className="mb-6 flex items-center justify-between">
         <button onClick={() => window.dispatchEvent(new CustomEvent('navigate', { detail: 'dashboard' }))} className="group flex items-center gap-2 text-indigo-600 font-black text-xs uppercase bg-white px-5 py-3 rounded-2xl shadow-sm border border-gray-100 hover:bg-indigo-50 transition-all">
           <ArrowLeft size={16} /> Back to Hub

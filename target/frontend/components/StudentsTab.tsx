@@ -18,11 +18,13 @@ const StudentsTab: React.FC<StudentsTabProps> = ({ classroom, onUpdate, onStartC
   );
 
   return (
-    <div className="p-8 space-y-8 h-full overflow-y-auto">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+   <div className="p-5 space-y-6 h-full overflow-y-auto">
+     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+
         {filteredStudents.map(student => (
-          <div key={student.id} className="bg-white rounded-[2.5rem] border border-gray-100 p-8 hover:shadow-2xl transition-all flex flex-col items-center text-center space-y-5">
-            <img src={student.avatar} className="w-24 h-24 rounded-[2rem] border-4 border-white shadow-xl" alt="" />
+          <div key={student.id} className="bg-white rounded-3xl border border-gray-100 p-6 hover:shadow-xl transition-all flex flex-col items-center text-center space-y-4"
+>
+            <img src={student.avatar} className="w-20 h-20 rounded-[2rem] border-4 border-white shadow-xl" alt="" />
             <div>
               <h4 className="text-xl font-black text-gray-900 tracking-tight">{student.name}</h4>
               <p className="text-xs font-bold text-gray-400 uppercase tracking-widest">{student.id}</p>
