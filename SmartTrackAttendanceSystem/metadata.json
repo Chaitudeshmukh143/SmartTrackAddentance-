@@ -1,8 +1,0 @@
-
-{
-  "name": "SmartTrack Attendance System",
-  "description": "Oracle Powered Student Attendance Application with QR Registration and Teacher Verification.",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}
