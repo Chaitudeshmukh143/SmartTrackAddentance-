@@ -1,5 +1,5 @@
 
-import { Classroom, User } from './types';
+import { Classroom, User } from './src/types';
 
 export const TEACHER_USER: User = {
   id: 'teacher-1',

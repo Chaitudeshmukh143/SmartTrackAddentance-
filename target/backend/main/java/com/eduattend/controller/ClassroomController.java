@@ -1,5 +1,5 @@
 
-package com.eduattend.controller;
+package main.java.com.eduattend.controller;
 
 import com.eduattend.model.*;
 import com.eduattend.service.ClassroomService;

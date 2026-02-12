@@ -1,5 +1,5 @@
 
-package com.eduattend.repository;
+package main.java.com.eduattend.repository;
 
 import com.eduattend.model.ClassroomEntity;
 import org.springframework.data.jpa.repository.JpaRepository;

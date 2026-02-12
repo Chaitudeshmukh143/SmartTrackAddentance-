@@ -2,11 +2,11 @@
 import React, { useState, useEffect } from 'react';
 import { Classroom, ViewType, User } from './types';
 import { api } from './api';
-import Dashboard from './components/Dashboard';
-import ClassroomView from './components/ClassroomView';
-import StudentClassroomView from './components/StudentClassroomView';
-import AuthView from './components/AuthView';
-import SettingsView from './components/SettingsView';
+import Dashboard from './src/components/Dashboard';
+import ClassroomView from './src/components/ClassroomView';
+import StudentClassroomView from './src/components/StudentClassroomView';
+import AuthView from './src/components/AuthView';
+import SettingsView from './src/components/SettingsView';
 import { GraduationCap, LayoutDashboard, LogOut, Menu, X, Loader2, Settings, Sparkles, User as UserIcon } from 'lucide-react';
 
 const App: React.FC = () => {

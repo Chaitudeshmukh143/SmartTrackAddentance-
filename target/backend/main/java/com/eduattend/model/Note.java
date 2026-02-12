@@ -1,5 +1,5 @@
 
-package com.eduattend.model;
+package main.java.com.eduattend.model;
 
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.Column;

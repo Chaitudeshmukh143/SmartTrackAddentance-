@@ -1,5 +1,5 @@
 
-package com.eduattend.service;
+package main.java.com.eduattend.service;
 
 import com.eduattend.model.*;
 import java.util.List;
