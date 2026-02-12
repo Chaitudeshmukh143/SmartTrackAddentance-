@@ -1,4 +1,4 @@
-
+(window as any).global = window;
 import React, { useState, useEffect } from 'react';
 import { Classroom, ViewType, User } from './types';
 import { api } from './api';
