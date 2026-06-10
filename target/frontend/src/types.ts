@@ -45,14 +45,15 @@ export interface AttendanceQuery {
 
 export interface Message {
   id: string;
+  classroomId: string;   // ADD THIS
   senderId: string;
   senderName: string;
-  recipientId?: string;
+  recipientId?: string | null;  // optional but useful
   text: string;
   timestamp: string;
-  role: 'teacher' | 'student';
-  status?: 'sent' | 'delivered' | 'read';
+  role: string;
 }
+
 
 export interface Classroom {
   id: string;

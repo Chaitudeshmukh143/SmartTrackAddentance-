@@ -16,6 +16,7 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
   const [isAiAnswering, setIsAiAnswering] = useState(false);
   const [activeRecipientId, setActiveRecipientId] = useState<string | null>(initialRecipientId || null);
   const [isConnected, setIsConnected] = useState(false);
+  const [onlineUsers, setOnlineUsers] = useState<string[]>([]); // FIXED
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -26,6 +27,21 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
     }
   }, [classroom.messages, isAiAnswering]);
 
+  // Load chat history
+  useEffect(() => {
+    fetch(`http://localhost:8080/api/chat/${classroom.id}`)
+      .then(res => res.ok ? res.json() : [])
+      .then(data => {
+        onUpdate({
+          ...classroom,
+          messages: Array.isArray(data) ? data : []
+        });
+      })
+      .catch(() => {
+        console.log("No chat history yet");
+      });
+  }, [classroom.id]);
+
   // WebSocket connect
   useEffect(() => {
 
@@ -33,33 +49,38 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
       console.log("WebSocket Connected");
       setIsConnected(true);
 
-      socketClient.subscribe("/topic/messages", (message) => {
-        const receivedMessage: Message = JSON.parse(message.body);
-
-        if ((receivedMessage as any).classroomId === classroom.id) {
-          onUpdate({
-            ...classroom,
-            messages: [...(classroom.messages || []), receivedMessage]
-          });
-        }
+      socketClient.subscribe("/topic/online", msg => {
+        setOnlineUsers(JSON.parse(msg.body));
       });
-    };
 
-    socketClient.onStompError = (frame) => {
-      console.error("Broker error:", frame.headers["message"]);
+      socketClient.subscribe("/topic/messages", (message) => {
+  console.log("Received raw:", message.body);
+
+  const receivedMessage = JSON.parse(message.body);
+  console.log("Parsed message:", receivedMessage);
+
+  onUpdate({
+    ...classroom,
+    messages: [...(classroom.messages || []), receivedMessage]
+  });
+});
+
     };
 
     socketClient.activate();
 
     return () => {
       socketClient.deactivate();
-      setIsConnected(false);
     };
 
-  }, [classroom]);
+  }, [classroom.id]);
 
-  // Filter messages
-  const filteredMessages = (classroom.messages || []).filter(msg => {
+  // Filter messages safely
+  const messagesArray = Array.isArray(classroom.messages)
+    ? classroom.messages
+    : [];
+
+  const filteredMessages = messagesArray.filter(msg => {
     if (activeRecipientId === null) return !msg.recipientId;
 
     return (
@@ -77,7 +98,7 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
       return;
     }
 
-    const newMessage: any = {
+    const newMessage: Message = {
       id: `msg-${Date.now()}`,
       classroomId: classroom.id,
       senderId: 'teacher-1',
@@ -103,7 +124,7 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
         `Student asked: ${text}. Provide helpful educational answer.`
       );
 
-      const aiMessage: any = {
+      const aiMessage: Message = {
         id: `msg-ai-${Date.now()}`,
         classroomId: classroom.id,
         senderId: 'ai',
@@ -150,6 +171,10 @@ const ChatTab: React.FC<ChatTabProps> = ({ classroom, onUpdate, initialRecipient
               alt=""
             />
             <div className="text-left font-black text-sm truncate">{student.name}</div>
+
+            {onlineUsers.includes(student.id) && (
+              <div className="w-2 h-2 bg-green-500 rounded-full ml-auto"></div>
+            )}
           </button>
         ))}
 
