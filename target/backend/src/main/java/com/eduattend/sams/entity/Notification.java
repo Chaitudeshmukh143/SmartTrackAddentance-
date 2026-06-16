@@ -1,18 +1,12 @@
 package com.eduattend.sams.entity;
 
+import com.eduattend.sams.enums.NotificationPriority;
 import com.eduattend.sams.enums.NotificationType;
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.Instant;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -34,15 +28,28 @@ public class Notification extends BaseEntity {
     @Column(nullable = false)
     private String title;
 
-    @Column(nullable = false, length = 1000)
-    private String body;
+    @Column(nullable = false, length = 2000)
+    private String message;
+
+    @Enumerated(EnumType.STRING)
+    private NotificationPriority priority;
 
     @Column(nullable = false)
     private boolean read;
 
+    private Instant readAt;
+
+    private String actionUrl;
+
+    private String metadataJson;
+
+    private UUID createdBy;
+
     public static Notification create() {
         Notification notification = new Notification();
         notification.setId(UUID.randomUUID());
+        notification.setRead(false);
+        notification.setPriority(NotificationPriority.MEDIUM); // default priority
         return notification;
     }
 }

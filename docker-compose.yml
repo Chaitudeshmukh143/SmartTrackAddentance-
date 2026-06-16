@@ -1,0 +1,99 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: sams_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DATABASE_DB:-samsdb}
+      POSTGRES_USER: ${DATABASE_USERNAME:-samsuser}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-samspass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: sams_redis
+    restart: unless-stopped
+    command: redis-server --save 60 1 --loglevel warning
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: ./target/backend
+    container_name: sams_backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DATABASE_DB:-samsdb}
+      SPRING_DATASOURCE_USERNAME: ${DATABASE_USERNAME:-samsuser}
+      SPRING_DATASOURCE_PASSWORD: ${DATABASE_PASSWORD:-samspass}
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      JWT_SECRET: ${JWT_SECRET:-your_jwt_secret_here}
+      JWT_EXPIRATION_MINUTES: ${JWT_EXPIRATION_MINUTES:-60}
+      MAIL_USERNAME: ${MAIL_USERNAME:-}
+      MAIL_PASSWORD: ${MAIL_PASSWORD:-}
+      UPLOAD_DIRECTORY: ${UPLOAD_DIRECTORY:-./uploads}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  frontend:
+    build: ./frontend
+    container_name: sams_frontend
+    restart: unless-stopped
+    depends_on:
+      backend:
+        condition: service_healthy
+    environment:
+      VITE_API_URL: ${VITE_API_URL:-http://localhost:8080/api}
+      VITE_WS_URL: ${VITE_WS_URL:-ws://localhost:8080/ws}
+      VITE_APP_NAME: ${VITE_APP_NAME:-SAMS}
+    ports:
+      - "80:80"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: sams_pgadmin
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL:-admin@sams.com}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD:-admin}
+    ports:
+      - "5050:80"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  redis_data:

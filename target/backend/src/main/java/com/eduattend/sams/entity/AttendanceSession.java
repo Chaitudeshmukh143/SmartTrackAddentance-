@@ -1,5 +1,6 @@
 package com.eduattend.sams.entity;
 
+import com.eduattend.sams.enums.SecurityLevel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -7,11 +8,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
-import lombok.Getter;
-import lombok.Setter;
 
 @Getter
 @Setter
@@ -42,6 +44,21 @@ public class AttendanceSession extends BaseEntity {
     private Double latitude;
 
     private Double longitude;
+
+    // New fields for security
+    private String sessionToken;
+
+    @Column(name = "created_by")
+    private UUID createdBy;
+
+    @Enumerated(jakarta.persistence.EnumType.STRING)
+    private SecurityLevel securityLevel;
+
+    private boolean locationValidationEnabled;
+
+    private boolean deviceValidationEnabled;
+
+    private Integer attendanceWindowMinutes;
 
     public static AttendanceSession create() {
         AttendanceSession session = new AttendanceSession();
