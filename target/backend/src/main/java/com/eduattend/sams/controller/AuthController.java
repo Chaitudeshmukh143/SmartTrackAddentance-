@@ -8,10 +8,14 @@ import com.eduattend.sams.dto.auth.RefreshTokenRequest;
 import com.eduattend.sams.dto.auth.RegisterRequest;
 import com.eduattend.sams.dto.auth.ResetPasswordRequest;
 import com.eduattend.sams.service.AuthService;
+import com.eduattend.sams.service.PasswordResetService;
+import com.eduattend.sams.service.VerificationService;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -20,9 +24,13 @@ import org.springframework.web.bind.annotation.RestController;
 public class AuthController {
 
     private final AuthService authService;
+    private final VerificationService verificationService;
+    private final PasswordResetService passwordResetService;
 
-    public AuthController(AuthService authService) {
+    public AuthController(AuthService authService, VerificationService verificationService, PasswordResetService passwordResetService) {
         this.authService = authService;
+        this.verificationService = verificationService;
+        this.passwordResetService = passwordResetService;
     }
 
     @PostMapping("/register")
@@ -42,13 +50,36 @@ public class AuthController {
 
     @PostMapping("/forgot-password")
     public ResponseEntity<ApiResponse<Void>> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
-        authService.forgotPassword(request);
+        passwordResetService.generateAndSendResetToken(request.email());
         return ResponseEntity.ok(ApiResponse.success("If the account exists, a reset email will be sent", null));
     }
 
     @PostMapping("/reset-password")
     public ResponseEntity<ApiResponse<Void>> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request);
+        passwordResetService.validateAndResetPassword(request.token(), request.newPassword());
         return ResponseEntity.ok(ApiResponse.success("Password reset successful", null));
+    }
+
+    @GetMapping("/verify")
+    public ResponseEntity<ApiResponse<Void>> verify(@RequestParam String token) {
+        verificationService.verifyToken(token);
+        return ResponseEntity.ok(ApiResponse.success("Email verified successfully", null));
+    }
+
+    @PostMapping("/resend-verification")
+    public ResponseEntity<ApiResponse<Void>> resendVerification(@Valid @RequestBody LoginRequest request) {
+        // Find user by email
+        var userOptional = authService.getUserRepository().findByEmailIgnoreCase(request.email());
+        if (userOptional.isPresent()) {
+            var user = userOptional.get();
+            if (!user.isEmailVerified()) {
+                verificationService.resendVerificationToken(user);
+                return ResponseEntity.ok(ApiResponse.success("Verification email resent", null));
+            } else {
+                throw new BadRequestException("Email is already verified");
+            }
+        }
+        // Don't reveal whether the email exists for security
+        return ResponseEntity.ok(ApiResponse.success("If the account exists and is not verified, a verification email has been sent", null));
     }
 }

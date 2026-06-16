@@ -16,23 +16,23 @@ import lombok.Setter;
 @Setter
 @Entity
 @Table(name = "holidays")
-public class Holiday extends BaseEntity {
+public class Holiday {
 
     @Id
     private UUID id;
 
     @Column(nullable = false)
-    private String name;
+    private String title;
+
+    @Column(nullable = false, length = 2000)
+    private String description;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private HolidayType type;
+    private HolidayType holidayType;
 
     @Column(nullable = false)
-    private LocalDate holidayDate;
-
-    @Column(nullable = false)
-    private boolean recurring;
+    private LocalDate date;
 
     public static Holiday create() {
         Holiday holiday = new Holiday();
